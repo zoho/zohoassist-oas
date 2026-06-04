@@ -1,0 +1,161 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - scheduleSession
+  description: Schedule a new remote support session in Zoho Assist.
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/session/schedule:
+    post:
+      summary: Schedule a session
+      description: Schedule a new remote support session in Zoho Assist.
+      operationId: scheduleSession
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.sessionapi.CREATE
+      parameters:
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mode
+                - title
+                - customer_email
+                - schedule_time
+                - schedule_upto
+                - utc_offset
+                - time_zone
+                - reminder
+                - department_id
+              properties:
+                mode:
+                  type: string
+                  default: "SCHEDULE"
+                  description: >
+                    Session mode. Always "SCHEDULE" for scheduling a session.
+                    Do not prompt the user for this value.
+                title:
+                  type: string
+                  description: >
+                    Title of the scheduled session. Get this from the user.
+                  example: "Remote Support Session"
+                notes:
+                  type: string
+                  description: >
+                    Description or notes for the scheduled session. Get this
+                    from the user. Optional.
+                  example: "Session to troubleshoot network issue"
+                customer_email:
+                  type: string
+                  format: email
+                  description: >
+                    The customer's email address to whom the session will be
+                    scheduled. Get this from the user.
+                  example: "customer@example.com"
+                schedule_time:
+                  type: integer
+                  format: int64
+                  description: >
+                    Scheduled start time as epoch timestamp in milliseconds.
+                    Get the date and time from the user and convert to epoch.
+                  example: 1771866029000
+                schedule_upto:
+                  type: integer
+                  format: int64
+                  description: >
+                    Estimated session end time as epoch timestamp in
+                    milliseconds. Get the end time from the user and convert
+                    to epoch.
+                  example: 1771869629000
+                utc_offset:
+                  type: string
+                  description: >
+                    UTC offset of the user's timezone.
+                    Do not prompt the user for this value; derive from
+                    the user's timezone.
+                  default: "+05:30"
+                time_zone:
+                  type: string
+                  description: >
+                    Timezone identifier in which the session is scheduled.
+                    Do not prompt the user for this value; derive from
+                    the user's locale/timezone.
+                  default: "Asia/Kolkata"
+                reminder:
+                  type: integer
+                  description: >
+                    Reminder time in minutes before the session.
+                    Defaults to 0. Options: 0 (no reminder), 5 (5 minutes
+                    before), 10 (10 minutes before), 15 (15 minutes before).
+                    Do not prompt the user for this value.
+                  default: 0
+                identity:
+                  type: string
+                  description: >
+                    Identity field. Defaults to empty string.
+                    Do not prompt the user for this value.
+                  default: ""
+                department_id:
+                  type: string
+                  description: >
+                    Department ID in which the session is to be scheduled.
+                    Resolved from the fetchUserDetails API response
+                    (departments list, prerequisite). Before calling this
+                    API, call fetchUserDetails to get departments. Present
+                    the departments to the user and ask "For which
+                    department should I schedule the session?". Use the
+                    department selected by the user. If a department was
+                    already selected by the user in a previous query in
+                    the same conversation, reuse that department without
+                    calling fetchUserDetails again. Get the session title,
+                    description (notes), customer email, and schedule
+                    time from the user.
+      responses:
+        "200":
+          description: >
+            Session scheduled successfully. The response includes a
+            schedule_id, a technician_url (link for the technician to
+            join the session), and a customer_url (shareable link for
+            the customer).
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.sessionapi.CREATE: Create access to Zoho Assist sessions

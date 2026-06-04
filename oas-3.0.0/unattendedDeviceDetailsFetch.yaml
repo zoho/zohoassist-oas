@@ -1,0 +1,95 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - unattendedDeviceDetailsFetch
+  description: Fetch detailed information of a specific unattended device in Zoho Assist
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/devices/{resource_id}:
+    get:
+      summary: Get unattended device details
+      description: Fetch detailed information of a specific unattended device.
+      operationId: unattendedDeviceDetailsFetch
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.unattended.computer.READ
+      parameters:
+        - name: resource_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: >
+            The resource ID of the device whose details are to be fetched.
+            Obtained from a previous unattendedDevicesListFetch API
+            response (resource_id field of the selected device). Before
+            calling this API, call unattendedDevicesListFetch to get
+            devices. Present the devices to the user and ask "Which
+            device details should I fetch?". Use the resource_id of
+            the selected device.
+        - name: x-com-zoho-assist-department-id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: >
+            The department ID to which the device belongs. Resolved from
+            the fetchUserDetails API response (departments list). If a
+            department was already selected by the user in a previous
+            query in the same conversation, reuse that department.
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+        - name: source
+          in: header
+          required: false
+          schema:
+            type: string
+            default: "MCP"
+          description: >
+            The source from which the request is made. Defaults to "MCP".
+            Do not prompt the user for this value.
+      responses:
+        "200":
+          description: >
+            Fetched device details successfully. The response includes
+            device info (name, status, IP addresses, serial number),
+            platform details (OS), domain details, manufacturer details,
+            network details, groups, department info, credentials,
+            logged-on users, last accessed time, and last accessed by.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.unattended.computer.READ: Read access to Zoho Assist unattended devices

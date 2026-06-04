@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - unattendedDeviceDisplayNameUpdate
+  description: Update the display name of an unattended device in Zoho Assist.
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/devices/{resource_id}:
+    put:
+      summary: Update unattended device display name
+      description: Update the display name of an unattended device.
+      operationId: unattendedDeviceDisplayNameUpdate
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.unattended.computer.UPDATE
+      parameters:
+        - name: resource_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: >
+            The resource ID of the device to update. Obtained from a
+            previous unattendedDevicesListFetch API response. Ask the
+            user which device they want to rename. To view detailed
+            information about a device before or after updating, use
+            the unattendedDeviceDetailsFetch API with the device's
+            resource_id.
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+        - name: x-com-zoho-assist-department-id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: >
+            The department ID to which the device belongs. Resolved from
+            the fetchUserDetails API response (departments list). If a
+            department was already selected by the user in a previous
+            query in the same conversation, reuse that department.
+        - name: source
+          in: header
+          required: false
+          schema:
+            type: string
+            default: "MCP"
+          description: >
+            The source from which the request is made. Defaults to "MCP".
+            Do not prompt the user for this value.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - display_name
+              properties:
+                display_name:
+                  type: string
+                  description: >
+                    The new display name for the device. Get this from
+                    the user.
+                  example: "Malcolm's device"
+      responses:
+        "200":
+          description: >
+            Device display name updated successfully. The response
+            confirms the update was applied to the specified device.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.unattended.computer.UPDATE: Update access to Zoho Assist unattended devices

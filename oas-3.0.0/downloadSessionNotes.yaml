@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - downloadSessionNotes
+  description: Download notes from a Zoho Assist session
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/session/notes/export:
+    get:
+      summary: Download session notes
+      description: Download the notes from a Zoho Assist session.
+      operationId: downloadSessionNotes
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.sessionapi.READ
+      parameters:
+        - name: sys_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: >
+            Session primary key. This is NOT the session ID that the
+            user provides. The user will give a session ID (9-10 digits).
+            Resolve the corresponding sys_id by calling
+            getSysIdForSessionId with the session ID, or obtain it from
+            the fetchSessionReports API. Do not prompt the user for
+            sys_id directly. If the sys_id was already fetched for this
+            session ID in the current conversation, reuse it instead of
+            calling again.
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+      responses:
+        "200":
+          description: >
+            Session notes exported successfully. The notes text is
+            returned directly in the response body.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.sessionapi.READ: Read access to Zoho Assist sessions

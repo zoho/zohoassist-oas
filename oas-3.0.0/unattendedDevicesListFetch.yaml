@@ -1,0 +1,294 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - unattendedDevicesListFetch
+  description: Fetch the list of unattended devices for a department in Zoho Assist
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/devices:
+    get:
+      summary: Get unattended devices
+      description: Fetch the list of unattended devices in a given department.
+      operationId: unattendedDevicesListFetch
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.unattended.computer.READ
+      parameters:
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+        - name: x-com-zoho-assist-department-id
+          in: header
+          required: true
+          schema:
+            type: string
+          description: >
+            The department ID for which the devices list is requested.
+            Resolved from the fetchUserDetails API response (departments
+            list). Before calling this API, call fetchUserDetails to get
+            the list of departments. Present the departments to the user
+            and ask "For which department should I fetch devices?". If a
+            department was already selected by the user in a previous
+            query in the same conversation, reuse that department.
+        - name: source
+          in: header
+          required: false
+          schema:
+            type: string
+            default: "MCP"
+          description: >
+            The source from which the request is made. Defaults to "MCP".
+            Do not prompt the user for this value.
+        - name: index
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: >
+            Pagination index. Position of devices in the list. Defaults to 1.
+            Do not prompt the user for this value.
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 25
+            minimum: 1
+            maximum: 50
+          description: >
+            Number of records to return. Defaults to 25. Range: 1-50.
+            Do not prompt the user for this value.
+        - name: include
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated list of additional details to include in the
+            response. Allowed values: domain, network, manufacturer,
+            favorites, logged_on_users.
+        - name: recent
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: >
+            When true, returns only recently connected devices.
+        - name: favorites
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: >
+            When true, returns only favorite devices.
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - display_name
+              - device_name
+              - agent_version
+              - public_ip
+              - private_ip
+              - computer_full_name
+              - os_platform
+              - os_name
+              - os_version
+          description: >
+            Column by which the data must be sorted.
+        - name: is_ascending
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: >
+            Sort direction. true for ascending, false for descending.
+        - name: resource_type
+          in: query
+          required: false
+          schema:
+            type: integer
+            enum:
+              - 2
+              - 4
+          description: >
+            Filter by resource type. 2 for Computers only, 4 for Handhelds only.
+        - name: group_ids
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated group IDs for filtering devices.
+        - name: device_status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated device status values for filtering.
+        - name: installation_status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated installation status integers for filtering.
+        - name: last_online
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Start and end times range in Unix timestamp format, separated
+            by "-" (e.g., "1677473317591-1683983999745").
+        - name: os_platforms
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated OS platforms for filtering (e.g., "windows,mac").
+        - name: os_names
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated OS names for filtering.
+        - name: os_versions
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated OS versions for filtering.
+        - name: domain_ids
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Comma-separated domain IDs for filtering.
+        - name: display_name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by display name.
+        - name: device_name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by device name.
+        - name: public_ip
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by public IP address.
+        - name: private_ip
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by private IP address.
+        - name: agent_version
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by agent version.
+        - name: computer_full_name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by full device name.
+        - name: os_platform
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by OS platform.
+        - name: os_name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by OS name.
+        - name: os_version
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by OS version.
+        - name: domain_name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by domain name.
+        - name: manufacturer
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by manufacturer.
+        - name: product
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by product.
+      responses:
+        "200":
+          description: >
+            Fetched unattended devices list successfully. The response
+            includes device details such as display name, device name,
+            device status, installation status, IP addresses,
+            online/offline status, OS platform, OS name, OS version,
+            resource ID, and timestamps. The total count is included
+            only when index is 1. To fetch comprehensive details of a
+            specific device, use the unattendedDeviceDetailsFetch API
+            with the device's resource_id.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.unattended.computer.READ: Read access to Zoho Assist unattended devices

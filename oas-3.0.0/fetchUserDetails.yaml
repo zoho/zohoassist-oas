@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - fetchUserDetails
+  description: Fetch details of the current authenticated Zoho Assist user
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/user:
+    get:
+      summary: Fetch user details
+      description: Fetch details of the current authenticated Zoho Assist user.
+      operationId: fetchUserDetails
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.userapi.READ
+      parameters:
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+      responses:
+        "200":
+          description: >
+            Fetched user details successfully. The response includes
+            user role, organization details, license information,
+            department memberships, and the user's preferred department ID.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.userapi.READ: Read access to Zoho Assist user data

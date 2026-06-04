@@ -1,0 +1,83 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - unattendedGroupsListFetch
+  description: Fetch the list of unattended computer groups in Zoho Assist
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/unattended_computer/group:
+    get:
+      summary: Get unattended groups
+      description: Fetch the list of unattended computer groups in a department.
+      operationId: unattendedGroupsListFetch
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.unattended.group.READ
+      parameters:
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+        - name: department_id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: >
+            Department ID in which the groups are created. Resolved from
+            the fetchUserDetails API response (departments list). Before
+            calling this API, call fetchUserDetails to get the list of
+            departments. Present the departments to the user and ask
+            "For which department should I fetch groups?". If a
+            department was already selected by the user in a previous
+            query in the same conversation, reuse that department.
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: >
+            Search query to filter groups by name. Only pass this if the
+            user asks to search for a specific group.
+      responses:
+        "200":
+          description: >
+            Fetched unattended groups list successfully. The response
+            includes group details such as group ID, group name,
+            created by, created time, description, computer count,
+            and whether it is a preferred group.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.unattended.group.READ: Read access to Zoho Assist unattended groups

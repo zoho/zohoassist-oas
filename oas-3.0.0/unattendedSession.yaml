@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - unattendedSession
+  description: Create an unattended remote session with a device in Zoho Assist
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/unattended/{resource_id}/connect:
+    post:
+      summary: Create an unattended remote session
+      description: Create an unattended remote session with a specific device.
+      operationId: createUnattendedSession
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.unattended.device.CREATE
+      parameters:
+        - name: resource_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: >
+            The resource ID of the device with which the session is to
+            be created. Resolved from the unattendedComputersListFetch API
+            response (resource_id field of the selected device). Before
+            calling this API, call unattendedComputersListFetch to get
+            the list of devices. Present the devices to the user and
+            ask "Which device should I connect to?". To view device
+            details before connecting, use unattendedDeviceDetailsFetch.
+        - name: department_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: >
+            The department ID in which the device is present. Resolved
+            from the fetchUserDetails API response (departments list).
+            If a department was already selected by the user in a
+            previous query in the same conversation, reuse that
+            department.
+        - name: osName
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - Window
+              - Linux
+          description: >
+            The OS name of the device. Applicable only for Windows and
+            Linux OS. Allowed values: "Window", "Linux".
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: >
+            The user ID of the logged-on user. Can be fetched from
+            unattended device details (unattendedComputersListFetch API).
+            Applicable only for Windows and Linux OS.
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+      responses:
+        "200":
+          description: >
+            Unattended session created successfully. The response
+            includes a session_key, authkey, authtype, viewerid,
+            whether a user is present on the device (is_user_present),
+            and a technician_uri. The technician_uri is a link for the
+            technician to start the unattended session - open this in
+            a new browser tab.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.unattended.device.CREATE: Create access to Zoho Assist unattended sessions

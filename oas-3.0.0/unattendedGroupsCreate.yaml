@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - unattendedGroupsCreate
+  description: Create a new unattended computer group in Zoho Assist
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/unattended_computer/group:
+    post:
+      summary: Create an unattended group
+      description: Create a new unattended computer group.
+      operationId: unattendedGroupsCreate
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.unattended.group.CREATE
+      parameters:
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - department_id
+                - group_name
+                - description
+              properties:
+                department_id:
+                  type: string
+                  description: >
+                    Department ID in which the group is to be created.
+                    Resolved from the fetchUserDetails API response
+                    (departments list). Before calling this API, call
+                    fetchUserDetails to get the list of departments.
+                    Present the departments to the user and ask "For
+                    which department should I create the group?". If a
+                    department was already selected by the user in a
+                    previous query in the same conversation, reuse that
+                    department.
+                group_name:
+                  type: string
+                  description: >
+                    Name of the new unattended group. Get this from the user.
+                  example: "Malcolm Group"
+                description:
+                  type: string
+                  description: >
+                    Description of the new unattended group. Get this from
+                    the user.
+                  example: "Group for Malcolm's devices"
+                computer_list:
+                  type: array
+                  items:
+                    type: string
+                  description: >
+                    Optional list of device resource IDs to add to the new
+                    group. Obtained from the unattendedComputersListFetch API response.
+                    Only include if the user specifies devices to add.
+      responses:
+        "200":
+          description: >
+            Unattended group created successfully. The response includes
+            the created group's ID, name, department ID, description,
+            created time, and created by user.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.unattended.group.CREATE: Create access to Zoho Assist unattended groups

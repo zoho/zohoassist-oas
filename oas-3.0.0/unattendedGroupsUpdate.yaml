@@ -1,0 +1,117 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - unattendedGroupsUpdate
+  description: Update an existing unattended computer group in Zoho Assist.
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/unattended_computer/group:
+    put:
+      summary: Update an unattended group
+      description: Update an existing unattended computer group.
+      operationId: unattendedGroupsUpdate
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.unattended.group.UPDATE
+      parameters:
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - department_id
+                - name
+              properties:
+                id:
+                  type: string
+                  description: >
+                    The group_id of the group to be updated. Obtained from
+                    a previous unattendedGroupsListFetch API response.
+                    Ask the user which group they want to update and what
+                    changes they want to make (name, description,
+                    add/remove devices). To view device details before
+                    adding or removing, use unattendedDeviceDetailsFetch.
+                department_id:
+                  type: string
+                  description: >
+                    Department ID in which the group is present. Resolved
+                    from the fetchUserDetails API response (departments
+                    list). If a department was already selected by the user
+                    in a previous query in the same conversation, reuse
+                    that department.
+                name:
+                  type: string
+                  description: >
+                    Updated name of the group. Get this from the user.
+                  example: "Updated group name"
+                description:
+                  type: string
+                  description: >
+                    Updated description of the group. Get this from the
+                    user. Optional.
+                  example: "Updated group description"
+                addedlist:
+                  type: array
+                  items:
+                    type: integer
+                    format: int64
+                  description: >
+                    List of device resource IDs to add to the group.
+                    Obtained from the unattendedComputersListFetch API response.
+                    Only include if the user specifies devices to add.
+                removedlist:
+                  type: array
+                  items:
+                    type: integer
+                    format: int64
+                  description: >
+                    List of device resource IDs to remove from the group.
+                    Obtained from the unattendedComputersListFetch API response.
+                    Only include if the user specifies devices to remove.
+      responses:
+        "200":
+          description: >
+            Unattended group updated successfully. The response confirms
+            the group was updated with the specified changes.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.unattended.group.UPDATE: Update access to Zoho Assist unattended groups

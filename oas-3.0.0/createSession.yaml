@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - createSession
+  description: Create a new remote support or screen sharing session in Zoho Assist.
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/session:
+    post:
+      summary: Create a session
+      description: Create a new remote support or screen sharing session in Zoho Assist.
+      operationId: createSession
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.sessionapi.CREATE
+      parameters:
+        - name: customer_email
+          in: query
+          required: false
+          schema:
+            type: string
+            format: email
+          description: >
+            Customer email address to whom the join invitation is to be sent.
+            Get this from the user if they want to invite a customer.
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - rs
+              - dm
+            default: "rs"
+          description: >
+            Session type. "rs" for Remote Support, "dm" for Screen Sharing.
+            Defaults to "rs". Ask the user which type of session they want
+            to create if not already clear from context.
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+      responses:
+        "200":
+          description: >
+            Session created successfully. The response includes a
+            customer_url (shareable link for the customer), a
+            technician_url (open in a new browser tab to start the
+            session), a unique session_id, an authkey, and an authtype.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.sessionapi.CREATE: Create access to Zoho Assist sessions

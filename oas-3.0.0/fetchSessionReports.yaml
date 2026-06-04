@@ -1,0 +1,127 @@
+openapi: 3.0.0
+info:
+  title: Zoho Assist - fetchSessionReports
+  description: Fetch session reports for Zoho Assist
+  version: 1.0.0
+servers:
+  - url: https://assist.zoho.{dc}
+    description: Zoho Assist API server URL for your account region.
+    variables:
+      dc:
+        enum:
+          - com
+          - eu
+          - in
+          - com.au
+          - com.cn
+          - jp
+          - uk
+          - sa
+          - sg
+          - ae
+        default: com
+        description: The data center domain corresponding to the account's region.
+paths:
+  /api/v2/reports:
+    get:
+      summary: Fetch session reports
+      description: Fetch reports of previously conducted Zoho Assist sessions.
+      operationId: fetchSessionReports
+      security:
+        - iam-oauth2-schema:
+          - ZohoAssist.reportapi.READ
+      parameters:
+        - name: x-com-zoho-assist-orgid
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Zoho Assist Organization ID
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - rs
+              - URS
+              - all
+            default: "all"
+          description: >
+            Session type filter. "rs" for Remote Support, "URS" for
+            Unattended Remote Support, "all" for all session types.
+            Defaults to "all". Do not prompt the user for this value
+            unless they ask for a specific session type.
+        - name: fromdate
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: >
+            Start date as epoch timestamp in milliseconds. Get the start
+            date from the user and convert to epoch.
+          example: 1518546600000
+        - name: todate
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: >
+            End date as epoch timestamp in milliseconds. Get the end date
+            from the user and convert to epoch.
+          example: 1519151400000
+        - name: email
+          in: query
+          required: false
+          schema:
+            type: string
+            format: email
+          description: >
+            Filter reports by a specific technician's email address.
+            Only pass this if the user asks for reports of a specific
+            technician.
+        - name: index
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+          description: >
+            Pagination index. Defaults to 1.
+            Do not prompt the user for this value.
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+          description: >
+            Number of records per page. Defaults to 20.
+            Do not prompt the user for this value.
+      responses:
+        "200":
+          description: >
+            Fetched session reports successfully. The response includes
+            session ID, session type, viewer/agent OS and IP, email
+            addresses, start/end times, duration in milliseconds
+            (convert to human-readable format before presenting to the
+            user), display name, session owner email, and pagination
+            links.
+          content:
+            application/json:
+              schema:
+                type: object
+        "500":
+          description: Internal Server Error
+components:
+  securitySchemes:
+    iam-oauth2-schema:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://accounts.zoho.com/oauth/v2/auth
+          tokenUrl: https://accounts.zoho.com/oauth/v2/token
+          scopes:
+            ZohoAssist.reportapi.READ: Read access to Zoho Assist session reports
