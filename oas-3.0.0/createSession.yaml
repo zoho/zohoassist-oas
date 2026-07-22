@@ -53,6 +53,17 @@ paths:
             Session type. "rs" for Remote Support, "dm" for Screen Sharing.
             Defaults to "rs". Ask the user which type of session they want
             to create if not already clear from context.
+        - name: src
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - MCP
+            default: MCP
+          description: >
+            Tracking source. Always set to "MCP".
+            Do not prompt the user for this value.
         - name: x-com-zoho-assist-orgid
           in: header
           required: true
