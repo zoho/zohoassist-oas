@@ -35,8 +35,7 @@ paths:
           in: query
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
           description: >
             Session primary key (numeric ID). This is NOT the session ID
             that the user provides. The user will give a session ID
